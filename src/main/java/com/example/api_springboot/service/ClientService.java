@@ -1,7 +1,5 @@
 package com.example.api_springboot.service;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.repository.ClientRepository;
@@ -43,4 +41,31 @@ public class ClientService {
         throw new RuntimeException("Utilisateur non authentifié");
     }
 
+    public Client updateClient(Client cl){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication!=null && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            Client existingClient =  clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
+
+            if(cl.getNom()!=null){
+                existingClient.setNom(cl.getNom());
+            }
+            if(cl.getPrenom()!=null){
+                existingClient.setPrenom(cl.getPrenom());
+            }
+            if(cl.getEmail()!=null){
+                existingClient.setEmail(cl.getEmail());
+            }
+            if(cl.getPhone()!=0){
+                existingClient.setPhone(cl.getPhone());
+            }
+            if(cl.getPassword()!=null){
+                existingClient.setPassword(cl.getPassword());
+            }
+
+            return clientRepository.save(existingClient);
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
+    }
 }
