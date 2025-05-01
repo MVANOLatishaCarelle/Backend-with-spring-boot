@@ -81,23 +81,26 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Dépendance pour OAuth2 Resource Server (pour la gestion des tokens JWT) -->
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
 
-<dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-oauth2-jose</artifactId>
-    <version>6.0.0</version> <!-- Version compatible avec Spring Security 6.x -->
-</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+			<version>6.0.0</version> <!-- Version compatible avec Spring Security 6.x -->
+		</dependency>
 
-<!-- Dépendance pour les fonctionnalités de base de Spring Security OAuth2 -->
-<dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-oauth2-core</artifactId>
-</dependency>
+		<!-- Dépendance pour les fonctionnalités de base de Spring Security OAuth2 -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-core</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

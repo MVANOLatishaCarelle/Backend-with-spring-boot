@@ -16,7 +16,7 @@ public class Vendeur {
     private String adresse;
     private int phone;
     private String password;
-    private String heureOuverture;
+    private String horaire;
     private String photo;
 
 }

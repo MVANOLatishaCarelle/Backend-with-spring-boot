@@ -1,0 +1,99 @@
+package com.example.api_springboot.service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.api_springboot.modele.Vendeur;
+import com.example.api_springboot.repository.VendeurRepository;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class VendeurService {
+    private final VendeurRepository vendeurRepository;
+    private final JwtUtil jwtUtil;
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    public Vendeur createVendeur(Vendeur vendeur, MultipartFile photoFile) throws IOException{
+        if(photoFile!=null && !photoFile.isEmpty()){
+            try {
+                String uploadDir = "uploads/";
+                String filename = UUID.randomUUID()+ " - "+photoFile.getOriginalFilename();
+                Path filePath = Paths.get(uploadDir + filename);
+                Files.createDirectories(filePath.getParent());
+                Files.write(filePath, photoFile.getBytes());
+
+                vendeur.setPhoto(filePath.toString());
+            } catch (IOException e) {
+                throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+            }
+        }
+        vendeur.setPassword(encoder.encode(vendeur.getPassword()));
+        return vendeurRepository.save(vendeur);
+    }
+
+    public String authenticate(Vendeur vendeur){
+        Vendeur ven = vendeurRepository.findByEmail(vendeur.getEmail()).orElseThrow(()-> new RuntimeException("Email non trouve"));
+
+        if(encoder.matches(vendeur.getPassword(), ven.getPassword())){
+            return jwtUtil.generateToken(ven.getEmail());
+        }else{
+            throw new RuntimeException("Nom d'utilisateur ou Mot de passe incorrect");
+        }
+    }
+
+    public Vendeur getVendeur(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication!=null && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            return vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
+    }
+
+    public Vendeur updatevendeur(Vendeur vend){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication!=null && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            Vendeur existingvendeur =  vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
+
+            if(vend.getNom()!=null){
+                existingvendeur.setNom(vend.getNom());
+            }
+            if(vend.getAdresse()!=null){
+                existingvendeur.setAdresse(vend.getAdresse());
+            }
+            if(vend.getEmail()!=null){
+                existingvendeur.setEmail(vend.getEmail());
+            }
+            if(vend.getPhone()!=0){
+                existingvendeur.setPhone(vend.getPhone());
+            }
+            if(vend.getHoraire()!=null){
+                existingvendeur.setHoraire(vend.getHoraire());
+            }
+            if(vend.getPhoto()!=null){
+                existingvendeur.setPhoto(vend.getPhoto());
+            }
+            if(vend.getPassword()!=null){
+                existingvendeur.setPassword(vend.getPassword());
+            }
+
+            return vendeurRepository.save(existingvendeur);
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
+    }
+}
+
