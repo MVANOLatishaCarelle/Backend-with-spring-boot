@@ -62,6 +62,19 @@ public class VendeurService {
         throw new RuntimeException("Utilisateur non authentifié");
     }
 
+    public Vendeur deleteVendeur(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication!=null && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Vendeur non trouvé"));
+            
+            vendeurRepository.delete(vendeur);
+            return vendeur;
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
+    }
+
     public Vendeur updatevendeur(Vendeur vend){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
