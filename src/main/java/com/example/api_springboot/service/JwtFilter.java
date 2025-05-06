@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -19,18 +18,18 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     // Liste des URL à exclure du filtre
-    private static final List<String> EXCLUDED_PATHS = List.of(
-        "/client/auth",
-        "/vendeur",
-        "/client"
-    );
+    // private static final List<String> EXCLUDED_PATHS = List.of(
+    //     "/client/auth",
+    //     "/vendeur",
+    //     "/client"
+    // );
 
-    @SuppressWarnings("null")
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
-    }
+    // @SuppressWarnings("null")
+    // @Override
+    // protected boolean shouldNotFilter(HttpServletRequest request) {
+    //     String path = request.getServletPath();
+    //     return EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+    // }
 
     @SuppressWarnings("null")
     @Override

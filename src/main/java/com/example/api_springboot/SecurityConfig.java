@@ -33,6 +33,11 @@ public class SecurityConfig {
                 // Endpoints publics
                 .requestMatchers(HttpMethod.POST, "/client", "/vendeur").permitAll()
                 .requestMatchers(HttpMethod.POST, "/client/auth", "/vendeur/auth").permitAll()
+                // Endpoints nécessitant une authentification
+                .requestMatchers(HttpMethod.GET, "/client", "/vendeur").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/client","/vendeur").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/client", "/vendeur").authenticated()
+                .requestMatchers(HttpMethod.POST, "/plat").authenticated()
                 // Tous les autres endpoints nécessitent une authentification
                 .anyRequest().authenticated()
             )

@@ -2,6 +2,8 @@ package com.example.api_springboot.controller;
 
 import com.example.api_springboot.modele.Plat;
 import com.example.api_springboot.service.PlatService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,17 +13,18 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/plats")
+@RequestMapping("/plat")
 @RequiredArgsConstructor
 public class PlatController {
 
     private final PlatService platService;
 
     @PostMapping
-    public ResponseEntity<Plat> createPlat(@RequestPart("plat") Plat plat,
-                                           @RequestPart(value = "photo", required = false) MultipartFile photo) throws IOException {
-        Plat createdPlat = platService.createPlat(plat, photo);
-        return ResponseEntity.ok(createdPlat);
+    public ResponseEntity<Plat> createPlat(@RequestPart("plat") String platJson, @RequestPart("photo") MultipartFile photo) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Plat plat = objectMapper.readValue(platJson, Plat.class);
+        Plat newPlat = platService.createPlat(plat, photo);
+        return ResponseEntity.ok(newPlat);
     }
 
     @GetMapping("/mes-plats")
@@ -30,13 +33,13 @@ public class PlatController {
         return ResponseEntity.ok(plats);
     }
 
-    @GetMapping("/mes-plats/recherche")
+    @GetMapping("/mes-plats/{nom}")
     public ResponseEntity<List<Plat>> getPlatByNomPourVendeurConnecte(@RequestParam String nom) {
         List<Plat> plats = platService.getPlatByNomPourVendeurConnecte(nom);
         return ResponseEntity.ok(plats);
     }
 
-    @GetMapping("/recherche")
+    @GetMapping("/nom")
     public ResponseEntity<List<Plat>> getPlatByNom(@RequestParam String nom) {
         List<Plat> plats = platService.getPlatByNom(nom);
         return ResponseEntity.ok(plats);
