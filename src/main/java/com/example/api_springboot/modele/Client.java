@@ -13,6 +13,8 @@ public class Client {
 
     private String nom;
     private String prenom;
+
+    @Column(nullable = false, unique = true)
     private String email;
     private int phone;
     private String password;

@@ -1,54 +1,74 @@
 package com.example.api_springboot.controller;
 
-import java.io.IOException;
-import java.util.Map;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.example.api_springboot.modele.Plat;
 import com.example.api_springboot.service.PlatService;
-
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
-@RequestMapping("/plat")
+@RequestMapping("/plats")
 @RequiredArgsConstructor
 public class PlatController {
+
     private final PlatService platService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Plat> createPlat(@RequestPart("plat") @Valid Plat plat, @RequestPart("photo") MultipartFile photoFile) throws IOException{
-        Plat newPlat = platService.createPlat(plat, photoFile);
-        return ResponseEntity.ok(newPlat);
+    @PostMapping
+    public ResponseEntity<Plat> createPlat(@RequestPart("plat") Plat plat,
+                                           @RequestPart(value = "photo", required = false) MultipartFile photo) throws IOException {
+        Plat createdPlat = platService.createPlat(plat, photo);
+        return ResponseEntity.ok(createdPlat);
     }
 
-    @GetMapping
-    public Plat getPlat(){
-        Plat plat = platService.getPlat();
-        return plat;
+    @GetMapping("/mes-plats")
+    public ResponseEntity<List<Plat>> getPlatsDuVendeurConnecte() {
+        List<Plat> plats = platService.getPlatsDuVendeurConnecte();
+        return ResponseEntity.ok(plats);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Plat> deletePlat(){
-        Plat plat = platService.deletePlat();
-        return ResponseEntity.ok(plat);
+    @GetMapping("/mes-plats/recherche")
+    public ResponseEntity<List<Plat>> getPlatByNomPourVendeurConnecte(@RequestParam String nom) {
+        List<Plat> plats = platService.getPlatByNomPourVendeurConnecte(nom);
+        return ResponseEntity.ok(plats);
     }
 
-    @PatchMapping
-    public ResponseEntity<Plat> updatePlat(@RequestBody Plat plat){
-        Plat cl = platService.updatePlat(plat);
-        return ResponseEntity.ok(cl);
+    @GetMapping("/recherche")
+    public ResponseEntity<List<Plat>> getPlatByNom(@RequestParam String nom) {
+        List<Plat> plats = platService.getPlatByNom(nom);
+        return ResponseEntity.ok(plats);
     }
 
+    @GetMapping("/disponibles")
+    public ResponseEntity<List<Plat>> getPlatByDisponibilite(@RequestParam boolean disponible) {
+        List<Plat> plats = platService.getPlatByDisponibilite(disponible);
+        return ResponseEntity.ok(plats);
+    }
+
+    @GetMapping("/mes-plats/populaires")
+    public ResponseEntity<List<Plat>> getPlatsPopulairesDuVendeur() {
+        List<Plat> plats = platService.getPlatsPopulairesDuVendeur();
+        return ResponseEntity.ok(plats);
+    }
+
+    @GetMapping("/populaires")
+    public ResponseEntity<List<Plat>> getPlatsPopulaires() {
+        List<Plat> plats = platService.getPlatsPopulaires();
+        return ResponseEntity.ok(plats);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlat(@PathVariable Long id) {
+        platService.deletePlat(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Plat> updatePlat(@PathVariable Long id, @RequestBody Plat updatePlat) {
+        Plat updatedPlat = platService.updatePlat(id, updatePlat);
+        return ResponseEntity.ok(updatedPlat);
+    }
 }

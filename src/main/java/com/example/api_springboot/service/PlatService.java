@@ -93,7 +93,7 @@ public class PlatService {
     }
 
     public List<Plat> getPlatByDisponibilite(boolean disponible){
-        List<Plat> plats = platRepository.findByDisponibilite(disponible);
+        List<Plat> plats = platRepository.findByDisponible(disponible);
 
         if(plats!=null){
             throw new RuntimeException("Aucun plat trouvé");

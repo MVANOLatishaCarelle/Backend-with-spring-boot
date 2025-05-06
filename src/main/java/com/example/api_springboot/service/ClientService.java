@@ -17,6 +17,9 @@ public class ClientService {
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public Client createClient(Client client){
+        if(clientRepository.existsByEmail(client.getEmail())){
+            throw new IllegalArgumentException("Un client avec cet email existe déjà");
+        }
         client.setPassword(encoder.encode(client.getPassword()));
         return clientRepository.save(client);
     }

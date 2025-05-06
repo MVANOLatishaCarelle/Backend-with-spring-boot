@@ -30,10 +30,13 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/client/auth", "/client", "/vendeur/auth", "/vendeur").permitAll()
-                .requestMatchers(HttpMethod.POST, "/vendeur").permitAll()
+                // Endpoints publics
+                .requestMatchers(HttpMethod.POST, "/client", "/vendeur").permitAll()
+                .requestMatchers(HttpMethod.POST, "/client/auth", "/vendeur/auth").permitAll()
+                // Tous les autres endpoints nécessitent une authentification
                 .anyRequest().authenticated()
             )
+            // Ajout du filtre JWT avant le filtre d'authentification standard
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -12,12 +12,12 @@ import com.example.api_springboot.modele.Vendeur;
 public interface PlatRepository extends JpaRepository<Plat, Long>{
     List<Plat> findByVendeur(Vendeur vendeur);
     List<Plat> findByNom(String nom);
-    List<Plat> findByDisponibilite(boolean disponible);
+    List<Plat> findByDisponible(boolean disponible);
     List<Plat> findByNomAndVendeur(String nom, Vendeur vendeur);
 
-    @Query("SELECT ac.plat FROM article_commande WHERE ac.plat.vendeur = :vendeur GROUP BY ac.plat ORDER BY SUM(ac.quantite)")
+    @Query("SELECT ac.plat FROM ArticleCommande ac WHERE ac.plat.vendeur = :vendeur GROUP BY ac.plat ORDER BY SUM(ac.quantite)")
     List<Plat> findPlatsByVendeurOrderByPopularite(@Param("vendeur") Vendeur vendeur);
 
-    @Query("SELECT ac.plat FROM article_commande GROUP BY ac.plat ORDER BY SUM(ac.quantite)")
+    @Query("SELECT ac.plat FROM ArticleCommande ac GROUP BY ac.plat ORDER BY SUM(ac.quantite) DESC")
     List<Plat> findPlatsPopulaires();
 }

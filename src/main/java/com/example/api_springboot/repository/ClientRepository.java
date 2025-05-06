@@ -8,4 +8,5 @@ import com.example.api_springboot.modele.Client;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByEmail(String email);
+    boolean existsByEmail(String email);
 }
