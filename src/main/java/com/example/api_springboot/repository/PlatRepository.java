@@ -15,6 +15,9 @@ public interface PlatRepository extends JpaRepository<Plat, Long>{
     List<Plat> findByDisponibilite(boolean disponible);
     List<Plat> findByNomAndVendeur(String nom, Vendeur vendeur);
 
-    @Query("SELECT ac.plat FROM article_commande WHERE ac.plat.vendeur = :vendeur GROUP BY ac.plat ORDER BY sum(ac.quantite)")
+    @Query("SELECT ac.plat FROM article_commande WHERE ac.plat.vendeur = :vendeur GROUP BY ac.plat ORDER BY SUM(ac.quantite)")
     List<Plat> findPlatsByVendeurOrderByPopularite(@Param("vendeur") Vendeur vendeur);
+
+    @Query("SELECT ac.plat FROM article_commande GROUP BY ac.plat ORDER BY SUM(ac.quantite)")
+    List<Plat> findPlatsPopulaires();
 }

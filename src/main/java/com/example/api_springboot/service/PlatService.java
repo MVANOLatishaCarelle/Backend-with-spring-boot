@@ -79,7 +79,7 @@ public class PlatService {
             List<Plat> plats = platRepository.findByNomAndVendeur(nom, vendeur);
             
             if(plats!=null){
-                throw new RuntimeException("Aucun plat trouvé avec ce nom pour ce vendeu");
+                throw new RuntimeException("Aucun plat trouvé");
             }
             return plats;
     }
@@ -102,57 +102,67 @@ public class PlatService {
         return plats;
     }
 
-    public Plat getPlatByPopularity(){
+    public List<Plat> getPlatsPopulairesDuVendeur(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
-            String email = authentication.getName();
-            Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
-            
-            return platRepository.getAll(disponible);
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
         }
-        throw new RuntimeException("Utilisateur non authentifié");
+
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Vendeur non trouvé"));
+        return platRepository.findPlatsByVendeurOrderByPopularite(vendeur);
     }
     
-    public Plat deletePlat(){
+    public List<Plat> getPlatsPopulaires(){
+        return platRepository.findPlatsPopulaires();
+    }
+
+    public void deletePlat(Long id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
-            String email = authentication.getName();
-            Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Vendeur non trouvé"));
-            
-            platRepository.delete(plat);
-            return plat;
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
         }
-        throw new RuntimeException("Utilisateur non authentifié");
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Vendeur non trouvé"));
+        
+        Plat plat = platRepository.findById(id).orElseThrow(()-> new RuntimeException("Plat non trouvé"));
+        if(!plat.getVendeur().equals(vendeur)){
+            throw new RuntimeException("Vous n'êtes pas autorisé à supprimer ce plat");
+        }
+        platRepository.delete(plat);
     }
     
-    public Plat updatePlat(Plat plat){
+    public Plat updatePlat(Long id, Plat updatePlat){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
-            String email = authentication.getName();
-            Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Vendeur non trouvé"));
-            
-            if(plat.getNom()!=null){
-                p.setNom(plat.getNom());
-            }
-            if(plat.getDescription()!=null){
-                p.setDescription(plat.getDescription());
-            }
-            if(plat.getPrix() != 0){
-                p.setPrix(plat.getPrix());
-            }
-            if(plat.getPhoto()!=null){
-                p.sePhoto(plat.getPhoto());
-            }
-            if(plat.getDisponible()!=true){
-                p.setDisponible(plat.getDisponible());
-            }
-
-            return platRepository.save(p);
-            
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
         }
-        throw new RuntimeException("Utilisateur non authentifié");
-    }
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Vendeur non trouvé"));
+        
+        Plat plat = platRepository.findById(id).orElseThrow(()-> new RuntimeException("Plat non trouvé"));
+
+        if(!plat.getVendeur().equals(vendeur)){
+            throw new RuntimeException("Vous n'êtes pas autorisé à modifier ce plat");
+        }
+
+        if(updatePlat.getNom()!=null){
+            plat.setNom(updatePlat.getNom());
+        }
+        if(updatePlat.getDescription()!=null){
+            plat.setDescription(updatePlat.getDescription());
+        }
+        if(updatePlat.getPrix() != 0){
+            plat.setPrix(updatePlat.getPrix());
+        }
+        if(updatePlat.getPhoto()!=null){
+            plat.setPhoto(updatePlat.getPhoto());
+        }
+        if(updatePlat.getDisponible()!=null){
+            plat.setDisponible(updatePlat.getDisponible());
+        }
+        return platRepository.save(plat);
 }
