@@ -1,6 +1,7 @@
 package com.example.api_springboot.controller;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,11 +43,15 @@ public class ClientController {
         return client;
     }
 
+    @DeleteMapping
+    public ResponseEntity<Client> deleteClient(){
+        Client client = clientService.deleteClient();
+        return ResponseEntity.ok(client);
+    } 
+
     @PatchMapping
     public ResponseEntity<Client> updateClient(@RequestBody Client client){
         Client cl = clientService.updateClient(client);
         return ResponseEntity.ok(cl);
-    }
-
-    
+    }    
 }

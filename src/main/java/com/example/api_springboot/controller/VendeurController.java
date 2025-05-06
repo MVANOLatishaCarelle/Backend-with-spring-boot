@@ -57,8 +57,7 @@ public class VendeurController {
 
     @PatchMapping
     public ResponseEntity<Vendeur> updateVendeur(@RequestBody Vendeur vendeur){
-        Vendeur cl = vendeurService.updatevendeur(vendeur);
-        return ResponseEntity.ok(cl);
+        Vendeur v = vendeurService.updateVendeur(vendeur);
+        return ResponseEntity.ok(v);
     }
-
 }

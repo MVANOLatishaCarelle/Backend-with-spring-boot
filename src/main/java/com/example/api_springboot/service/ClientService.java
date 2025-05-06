@@ -41,6 +41,19 @@ public class ClientService {
         throw new RuntimeException("Utilisateur non authentifié");
     }
 
+    public Client deleteClient(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication!=null && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            Client client = clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Client non trouvé"));
+
+            clientRepository.delete(client);
+            return client;
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
+    }
+
     public Client updateClient(Client cl){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

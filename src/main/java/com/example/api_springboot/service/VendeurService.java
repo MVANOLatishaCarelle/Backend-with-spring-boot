@@ -75,7 +75,7 @@ public class VendeurService {
         throw new RuntimeException("Utilisateur non authentifié");
     }
 
-    public Vendeur updatevendeur(Vendeur vend){
+    public Vendeur updateVendeur(Vendeur vend){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication!=null && authentication.isAuthenticated()){
