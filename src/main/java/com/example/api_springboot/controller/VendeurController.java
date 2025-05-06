@@ -17,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.api_springboot.modele.Vendeur;
 import com.example.api_springboot.service.VendeurService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,7 +28,9 @@ public class VendeurController {
     private final VendeurService vendeurService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Vendeur> createVendeur(@RequestPart("vendeur") @Valid Vendeur vendeur, @RequestPart("photo") MultipartFile photoFile) throws IOException{
+    public ResponseEntity<Vendeur> createVendeur(@RequestPart("vendeur") String vendeurJson, @RequestPart("photo") MultipartFile photoFile) throws IOException{
+        ObjectMapper objectMapper = new ObjectMapper();
+        Vendeur vendeur = objectMapper.readValue(vendeurJson, Vendeur.class);
         Vendeur newVendeur = vendeurService.createVendeur(vendeur, photoFile);
         return ResponseEntity.ok(newVendeur);
     }
