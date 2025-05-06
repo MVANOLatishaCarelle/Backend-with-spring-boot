@@ -15,8 +15,8 @@ public class ArticleCommande {
     private int prix;
 
     @ManyToOne
-    @JoinColumn(name = "Client", referencedColumnName = "id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "Plat", referencedColumnName = "id", nullable = false)
+    private Plat plat;
 
     @ManyToOne
     @JoinColumn(name = "Commande", referencedColumnName = "id", nullable = false)

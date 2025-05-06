@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
@@ -52,40 +53,53 @@ public class PlatService {
         throw new RuntimeException("Utilisateur non authentifié");
     }
 
-    public Plat getPlat(){
+    public List<Plat> getPlatsDuVendeurConnecte(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+            
             String email = authentication.getName();
             Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
             
-            return platRepository.getAll();
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
+            return platRepository.findByVendeur(vendeur);        
     }
 
-    public Plat getPlatByNomDescription(String nom){
+    public List<Plat> getPlatByNomPourVendeurConnecte(String nom){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+            
             String email = authentication.getName();
             Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
+
+            List<Plat> plats = platRepository.findByNomAndVendeur(nom, vendeur);
             
-            return platRepository.getAll(nom);
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
+            if(plats!=null){
+                throw new RuntimeException("Aucun plat trouvé avec ce nom pour ce vendeu");
+            }
+            return plats;
     }
 
-    public Plat getPlatByDisponibilite(boolean disponible){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public List<Plat> getPlatByNom(String nom){
+        List<Plat> plats = platRepository.findByNom(nom);
 
-        if(authentication!=null && authentication.isAuthenticated()){
-            String email = authentication.getName();
-            Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
-            
-            return platRepository.getAll(disponible);
+        if(plats!=null){
+            throw new RuntimeException("Aucun plat trouvé");
         }
-        throw new RuntimeException("Utilisateur non authentifié");
+        return plats;
+    }
+
+    public List<Plat> getPlatByDisponibilite(boolean disponible){
+        List<Plat> plats = platRepository.findByDisponibilite(disponible);
+
+        if(plats!=null){
+            throw new RuntimeException("Aucun plat trouvé");
+        }
+        return plats;
     }
 
     public Plat getPlatByPopularity(){
