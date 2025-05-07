@@ -134,7 +134,7 @@ public class PlatService {
         platRepository.delete(plat);
     }
     
-    public Plat updatePlat(Long id, Plat updatePlat){
+    public Plat updatePlat(Long id, Plat updatePlat, MultipartFile photoFile){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
@@ -158,7 +158,8 @@ public class PlatService {
         if(updatePlat.getPrix() != 0){
             plat.setPrix(updatePlat.getPrix());
         }
-        if(updatePlat.getPhoto()!=null){
+        if(photoFile!=null && !photoFile.isEmpty()){
+            
             plat.setPhoto(updatePlat.getPhoto());
         }
         if(updatePlat.getDisponible()!=null){

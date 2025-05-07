@@ -2,6 +2,7 @@ package com.example.api_springboot.controller;
 
 import com.example.api_springboot.modele.Plat;
 import com.example.api_springboot.service.PlatService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -70,8 +71,11 @@ public class PlatController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Plat> updatePlat(@PathVariable Long id, @RequestBody Plat updatePlat) {
-        Plat updatedPlat = platService.updatePlat(id, updatePlat);
-        return ResponseEntity.ok(updatedPlat);
+    public ResponseEntity<Plat> updatePlat(@PathVariable Long id, @RequestPart("plat") String platJson, 
+            @RequestPart(value="photo", required=false) MultipartFile photoFile) throws JsonProcessingException{
+        ObjectMapper objectMapper = new ObjectMapper();
+        Plat plat = objectMapper.readValue(platJson, Plat.class);
+        Plat updatePlat = platService.updatePlat(id, plat, photoFile);
+        return ResponseEntity.ok(updatePlat);
     }
 }
