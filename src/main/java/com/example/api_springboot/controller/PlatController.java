@@ -34,13 +34,13 @@ public class PlatController {
     }
 
     @GetMapping("/mes-plats/{nom}")
-    public ResponseEntity<List<Plat>> getPlatByNomPourVendeurConnecte(@RequestParam String nom) {
+    public ResponseEntity<List<Plat>> getPlatByNomPourVendeurConnecte(@PathVariable String nom) {
         List<Plat> plats = platService.getPlatByNomPourVendeurConnecte(nom);
         return ResponseEntity.ok(plats);
     }
 
-    @GetMapping("/nom")
-    public ResponseEntity<List<Plat>> getPlatByNom(@RequestParam String nom) {
+    @GetMapping("/{nom}")
+    public ResponseEntity<List<Plat>> getPlatByNom(@PathVariable String nom) {
         List<Plat> plats = platService.getPlatByNom(nom);
         return ResponseEntity.ok(plats);
     }

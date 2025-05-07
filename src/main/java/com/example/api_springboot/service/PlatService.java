@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -77,8 +78,8 @@ public class PlatService {
 
             List<Plat> plats = platRepository.findByNomAndVendeur(nom, vendeur);
             
-            if(plats!=null){
-                throw new RuntimeException("Aucun plat trouvé");
+            if(plats == null || plats.isEmpty()){
+                return Collections.emptyList();
             }
             return plats;
     }
@@ -86,8 +87,8 @@ public class PlatService {
     public List<Plat> getPlatByNom(String nom){
         List<Plat> plats = platRepository.findByNom(nom);
 
-        if(plats!=null){
-            throw new RuntimeException("Aucun plat trouvé");
+        if(plats == null || plats.isEmpty()){
+            return Collections.emptyList();
         }
         return plats;
     }
@@ -95,7 +96,7 @@ public class PlatService {
     public List<Plat> getPlatByDisponibilite(boolean disponible){
         List<Plat> plats = platRepository.findByDisponible(disponible);
 
-        if(plats!=null){
+        if(plats == null || plats.isEmpty() ){
             throw new RuntimeException("Aucun plat trouvé");
         }
         return plats;

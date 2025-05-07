@@ -32,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Endpoints publics
                 .requestMatchers(HttpMethod.POST, "/client", "/vendeur").permitAll()
+                .requestMatchers(HttpMethod.GET, "/plat/{nom}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/client/auth", "/vendeur/auth").permitAll()
                 // Endpoints nécessitant une authentification
                 .requestMatchers(HttpMethod.GET, "/client", "/vendeur").authenticated()
@@ -39,7 +40,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/client", "/vendeur").authenticated()
                 .requestMatchers(HttpMethod.POST, "/plat").authenticated()
                 // Tous les autres endpoints nécessitent une authentification
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             // Ajout du filtre JWT avant le filtre d'authentification standard
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -50,7 +51,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // En développement, en production spécifiez les origines exactes
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
