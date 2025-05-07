@@ -15,7 +15,7 @@ public class Plat {
     private String description;
     private int prix;
     private String photo;
-    private Boolean  disponible = true;
+    private Boolean disponible = true;
 
     @ManyToOne
     @JoinColumn(name = "Vendeur", referencedColumnName = "id", nullable = false)
