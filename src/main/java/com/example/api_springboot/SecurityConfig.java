@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/client","/vendeur").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/client", "/vendeur").authenticated()
                 .requestMatchers(HttpMethod.POST, "/plat").authenticated()
-                // Tous les autres endpoints nécessitent une authentification
+                
                 .anyRequest().permitAll()
             )
             // Ajout du filtre JWT avant le filtre d'authentification standard
