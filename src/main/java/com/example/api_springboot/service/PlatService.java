@@ -158,9 +158,18 @@ public class PlatService {
         if(updatePlat.getPrix() != 0){
             plat.setPrix(updatePlat.getPrix());
         }
-        if(photoFile!=null && !photoFile.isEmpty()){
-            
-            plat.setPhoto(updatePlat.getPhoto());
+        if(photoFile != null && !photoFile.isEmpty()) {
+            try {
+                String uploadDir = "uploads/";
+                String filename = UUID.randomUUID() + " - " + photoFile.getOriginalFilename();
+                Path filePath = Paths.get(uploadDir + filename);
+                Files.createDirectories(filePath.getParent());
+                Files.write(filePath, photoFile.getBytes());
+        
+                plat.setPhoto(filePath.toString());
+            } catch (IOException e) {
+                throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+            }
         }
         if(updatePlat.getDisponible()!=null){
             plat.setDisponible(updatePlat.getDisponible());
