@@ -12,6 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -23,6 +26,9 @@ public class VendeurService {
     private final VendeurRepository vendeurRepository;
     private final JwtUtil jwtUtil;
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     public Vendeur createVendeur(Vendeur vendeur, MultipartFile photoFile) throws IOException{
         if(photoFile!=null && !photoFile.isEmpty()){
@@ -42,15 +48,19 @@ public class VendeurService {
         return vendeurRepository.save(vendeur);
     }
 
-    public String authenticate(Vendeur vendeur){
-        Vendeur ven = vendeurRepository.findByEmail(vendeur.getEmail()).orElseThrow(()-> new RuntimeException("Email non trouve"));
+    public String authenticate(String email, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(email, password)
+        );
 
-        if(encoder.matches(vendeur.getPassword(), ven.getPassword())){
-            return jwtUtil.generateToken(ven.getEmail());
-        }else{
-            throw new RuntimeException("Nom d'utilisateur ou Mot de passe incorrect");
+        // Si l'authentification est réussie, on génère un token
+        if (authentication.isAuthenticated()) {
+            return jwtUtil.generateToken(email); // Ici tu pourrais aussi utiliser authentication.getName() si nécessaire
+        } else {
+            throw new RuntimeException("Authentification échouée");
         }
     }
+
 
     public Vendeur getVendeur(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
