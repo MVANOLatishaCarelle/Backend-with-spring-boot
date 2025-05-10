@@ -3,14 +3,12 @@ package com.example.api_springboot.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 
 @Service
-@Component
 public class JwtUtil {
 
     @Value("${jwt.secret}")

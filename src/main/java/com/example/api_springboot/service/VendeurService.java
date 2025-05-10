@@ -1,5 +1,6 @@
 package com.example.api_springboot.service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,24 +14,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class VendeurService {
     private final VendeurRepository vendeurRepository;
     private final JwtUtil jwtUtil;
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
+    public VendeurService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
+                      VendeurRepository vendeurRepository, PasswordEncoder encoder) {
+    this.authenticationManager = authenticationManager;
+    this.jwtUtil = jwtUtil;
+    this.vendeurRepository = vendeurRepository;
+    this.encoder = encoder;
+}
     public Vendeur createVendeur(Vendeur vendeur, MultipartFile photoFile) throws IOException{
         if(photoFile!=null && !photoFile.isEmpty()){
             try {

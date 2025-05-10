@@ -2,7 +2,6 @@ package com.example.api_springboot.security;
 
 
 import com.example.api_springboot.service.VendeurDetailsService;
-import com.example.api_springboot.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
