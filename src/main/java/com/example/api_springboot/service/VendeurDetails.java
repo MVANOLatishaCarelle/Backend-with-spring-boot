@@ -1,4 +1,4 @@
-package com.example.api_springboot.security;
+package com.example.api_springboot.service;
 
 import com.example.api_springboot.modele.Vendeur;
 

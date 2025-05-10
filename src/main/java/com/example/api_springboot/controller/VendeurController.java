@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.api_springboot.dto.AuthRequest;
 import com.example.api_springboot.modele.Vendeur;
 import com.example.api_springboot.service.VendeurService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,9 +37,9 @@ public class VendeurController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<?> authentication(@RequestBody Vendeur vendeur){
+    public ResponseEntity<?> authentication(@RequestBody AuthRequest request){
         try {
-            String token = vendeurService.authenticate(vendeur);
+            String token = vendeurService.authenticate(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(Map.of("token", token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));

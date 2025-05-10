@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.api_springboot.modele.Vendeur;
 import com.example.api_springboot.repository.VendeurRepository;
+import com.example.api_springboot.security.JwtUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package com.example.api_springboot.service;
+package com.example.api_springboot.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

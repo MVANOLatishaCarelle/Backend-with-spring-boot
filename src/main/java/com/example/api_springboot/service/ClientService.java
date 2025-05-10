@@ -3,6 +3,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.repository.ClientRepository;
+import com.example.api_springboot.security.JwtUtil;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
