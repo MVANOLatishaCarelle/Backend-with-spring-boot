@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +40,7 @@ public class VendeurController {
 
     @PostMapping("/auth")
     public ResponseEntity<?> authentication(@RequestBody AuthRequest request){
+        System.out.println("Reçu : " + request.getEmail() + " / " + request.getPassword());
         try {
             String token = vendeurService.authenticate(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(Map.of("token", token));
@@ -46,6 +49,11 @@ public class VendeurController {
         }
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleJsonError(HttpMessageNotReadableException ex){
+        return ResponseEntity.badRequest().body(Map.of("error", "Format JSON invalide : " + ex.getMessage()));
+    }
+    
     @GetMapping
     public Vendeur getVendeur(){
         Vendeur vendeur = vendeurService.getVendeur();

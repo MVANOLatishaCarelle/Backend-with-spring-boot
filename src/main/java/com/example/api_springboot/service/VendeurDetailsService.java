@@ -2,6 +2,10 @@ package com.example.api_springboot.service;
 
 import com.example.api_springboot.modele.Vendeur;
 import com.example.api_springboot.repository.VendeurRepository;
+
+import java.util.Collections;
+
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +24,6 @@ public class VendeurDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Vendeur vendeur = vendeurRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("Vendeur non trouvé"));
-        return new VendeurDetails(vendeur);
+        return new User(vendeur.getEmail(), vendeur.getPassword(), Collections.emptyList());
     }
 }

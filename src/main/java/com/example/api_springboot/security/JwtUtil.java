@@ -2,7 +2,9 @@ package com.example.api_springboot.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -31,6 +33,21 @@ public class JwtUtil {
                 .compact();
     }
 
+    public boolean isTokenExpired(String token){
+        try {
+            Date expirationDate = Jwts.parserBuilder()
+            .setSigningKey(getSigningKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .getExpiration();
+
+            return expirationDate.before(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return true;
+        }
+    }
+
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -51,6 +68,23 @@ public class JwtUtil {
             System.out.println("Token validation failed: " + e.getMessage());
             return false;
         }
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails){
+        try {
+            String username = extractUsername(token);
+
+            if(username.equals(userDetails.getUsername()) && !isTokenExpired(token)){
+                Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+            }
+        } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("Token validation failed: " + e.getMessage());
+        }
+        return false;
     }
 }
 
