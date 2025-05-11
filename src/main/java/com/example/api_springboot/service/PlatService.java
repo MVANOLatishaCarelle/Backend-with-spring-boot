@@ -42,7 +42,7 @@ public class PlatService {
                     Files.createDirectories(filePath.getParent());
                     Files.write(filePath, photoFile.getBytes());
 
-                    plat.setPhoto(filePath.toString());
+                    plat.setPhoto(filename);
                 } catch (IOException e) {
                     throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
                 }
@@ -63,7 +63,15 @@ public class PlatService {
             String email = authentication.getName();
             Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
             
-            return platRepository.findByVendeur(vendeur);        
+            List<Plat> plats = platRepository.findByVendeur(vendeur);
+            plats.forEach(plat -> {
+                if(plat.getPhoto() != null && !plat.getPhoto().isEmpty()){
+                    plat.setPhoto("http://localhost:8080/uploads/"+ plat.getPhoto());
+                }else{
+                    plat.setPhoto(null);
+                }
+            });
+            return plats;        
     }
 
     public List<Plat> getPlatByNomPourVendeurConnecte(String nom){
@@ -166,7 +174,7 @@ public class PlatService {
                 Files.createDirectories(filePath.getParent());
                 Files.write(filePath, photoFile.getBytes());
         
-                plat.setPhoto(filePath.toString());
+                plat.setPhoto(filename);
             } catch (IOException e) {
                 throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
             }

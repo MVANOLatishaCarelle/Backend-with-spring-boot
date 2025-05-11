@@ -13,7 +13,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.example.api_springboot.service.VendeurDetailsService;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
