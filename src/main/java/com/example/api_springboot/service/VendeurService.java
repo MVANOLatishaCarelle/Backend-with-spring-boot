@@ -28,11 +28,11 @@ public class VendeurService {
 
     public VendeurService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
                       VendeurRepository vendeurRepository, PasswordEncoder encoder) {
-    this.authenticationManager = authenticationManager;
-    this.jwtUtil = jwtUtil;
-    this.vendeurRepository = vendeurRepository;
-    this.encoder = encoder;
-}
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.vendeurRepository = vendeurRepository;
+        this.encoder = encoder;
+    }
     public Vendeur createVendeur(Vendeur vendeur, MultipartFile photoFile) throws IOException{
         if(photoFile!=null && !photoFile.isEmpty()){
             try {
@@ -56,9 +56,8 @@ public class VendeurService {
             new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        // Si l'authentification est réussie, on génère un token
         if (authentication.isAuthenticated()) {
-            return jwtUtil.generateToken(email); // Ici tu pourrais aussi utiliser authentication.getName() si nécessaire
+            return jwtUtil.generateToken(email);
         } else {
             throw new RuntimeException("Authentification échouée");
         }
@@ -68,30 +67,32 @@ public class VendeurService {
     public Vendeur getVendeur(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
             String email = authentication.getName();
             return vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
     }
 
     public Vendeur deleteVendeur(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
             String email = authentication.getName();
             Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Vendeur non trouvé"));
             
             vendeurRepository.delete(vendeur);
             return vendeur;
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
     }
 
     public Vendeur updateVendeur(Vendeur vend){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
             String email = authentication.getName();
             Vendeur existingvendeur =  vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
 
@@ -118,8 +119,6 @@ public class VendeurService {
             }
 
             return vendeurRepository.save(existingvendeur);
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
     }
 }
 

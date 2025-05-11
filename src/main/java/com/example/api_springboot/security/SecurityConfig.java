@@ -1,7 +1,7 @@
 package com.example.api_springboot.security;
 
 
-import com.example.api_springboot.service.VendeurDetailsService;
+import com.example.api_springboot.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
@@ -24,7 +24,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Autowired
-    private VendeurDetailsService vendeurDetailsService;
+    private CustomUserDetailsService CustomUserDetailsService;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -82,7 +82,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(vendeurDetailsService);
+        authProvider.setUserDetailsService(CustomUserDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

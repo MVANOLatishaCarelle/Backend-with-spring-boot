@@ -1,10 +1,12 @@
 package com.example.api_springboot.service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.repository.ClientRepository;
 import com.example.api_springboot.security.JwtUtil;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -16,7 +18,16 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
     private final JwtUtil jwtUtil;
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
+
+    public ClientService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
+                      ClientRepository clientRepository, PasswordEncoder encoder) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.clientRepository = clientRepository;
+        this.encoder = encoder;
+    }
 
     public Client createClient(Client client){
         if(clientRepository.existsByEmail(client.getEmail())){
@@ -26,43 +37,47 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public String authenticate(Client client){
-        Client cl = clientRepository.findByEmail(client.getEmail()).orElseThrow(()-> new RuntimeException("Email non trouve"));
+    public String authenticate(String email, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(email, password)
+        );
 
-        if(encoder.matches(client.getPassword(), cl.getPassword())){
-            return jwtUtil.generateToken(cl.getEmail());
-        }else{
-            throw new RuntimeException("Nom d'utilisateur ou Mot de passe incorrect");
+        if (authentication.isAuthenticated()) {
+            return jwtUtil.generateToken(email);
+        } else {
+            throw new RuntimeException("Authentification échouée");
         }
     }
 
     public Client getClient(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
             String email = authentication.getName();
             return clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
     }
 
     public Client deleteClient(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
             String email = authentication.getName();
             Client client = clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Client non trouvé"));
 
             clientRepository.delete(client);
             return client;
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
     }
 
     public Client updateClient(Client cl){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication!=null && authentication.isAuthenticated()){
+        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
             String email = authentication.getName();
             Client existingClient =  clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
 
@@ -83,7 +98,5 @@ public class ClientService {
             }
 
             return clientRepository.save(existingClient);
-        }
-        throw new RuntimeException("Utilisateur non authentifié");
     }
 }

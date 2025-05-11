@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.api_springboot.dto.AuthRequest;
 import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.service.ClientService;
 
@@ -28,9 +29,9 @@ public class ClientController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<?> authentication(@RequestBody Client client){
+    public ResponseEntity<?> authentication(@RequestBody AuthRequest request){
         try {
-            String token = clientService.authenticate(client);
+            String token = clientService.authenticate(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(Map.of("token", token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
