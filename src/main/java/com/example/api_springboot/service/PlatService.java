@@ -84,11 +84,16 @@ public class PlatService {
             String email = authentication.getName();
             Vendeur vendeur = vendeurRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
 
-            List<Plat> plats = platRepository.findByNomAndVendeur(nom, vendeur);
+            String nomNormalise = nom.trim().toLowerCase();
+            List<Plat> plats = platRepository.findByNomIgnoreCaseAndVendeur(nomNormalise, vendeur);
             
-            if(plats == null || plats.isEmpty()){
-                return Collections.emptyList();
-            }
+            plats.forEach(plat -> {
+                if(plat.getPhoto()!=null & !plat.getPhoto().isEmpty()){
+                    plat.setPhoto("http://localhost:8080/uploads/"+ plat.getPhoto());
+                }else{
+                    plat.setPhoto(null);
+                }
+            });
             return plats;
     }
 

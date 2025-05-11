@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/client","/vendeur").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/client", "/vendeur").authenticated()
                 .requestMatchers(HttpMethod.POST, "/plat").authenticated()
-                .requestMatchers(HttpMethod.GET, "/plat/mes-plats").authenticated()
+                .requestMatchers(HttpMethod.GET, "/plat/mes-plats", "/plat/mes-plats/recherche").authenticated()
                 
                 .anyRequest().permitAll()
             )

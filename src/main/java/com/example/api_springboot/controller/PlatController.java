@@ -34,9 +34,9 @@ public class PlatController {
         return ResponseEntity.ok(plats);
     }
 
-    @GetMapping("/mes-plats/{nom}")
-    public ResponseEntity<List<Plat>> getPlatByNomPourVendeurConnecte(@PathVariable String nom) {
-        List<Plat> plats = platService.getPlatByNomPourVendeurConnecte(nom);
+    @GetMapping("/mes-plats/recherche")
+    public ResponseEntity<List<Plat>> getPlatByNomPourVendeurConnecte(@RequestParam String motCle) {
+        List<Plat> plats = platService.getPlatByNomPourVendeurConnecte(motCle);
         return ResponseEntity.ok(plats);
     }
 
