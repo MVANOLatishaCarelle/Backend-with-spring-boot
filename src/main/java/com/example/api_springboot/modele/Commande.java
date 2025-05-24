@@ -20,7 +20,9 @@ public class Commande {
 
     @Min(1)
     @Max(5)
-    private int rating;
+    private Integer rating;
+
+    @Column(nullable = true)
     private String commentaire;
 
     @Enumerated(EnumType.STRING)
@@ -28,7 +30,7 @@ public class Commande {
     private StatutCommande statut = StatutCommande.En_attente;
     
     @ManyToOne
-    @JoinColumn(name ="Client", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name ="client_id", referencedColumnName = "id")
     private Client client;
 
     // Add this inverse relationship

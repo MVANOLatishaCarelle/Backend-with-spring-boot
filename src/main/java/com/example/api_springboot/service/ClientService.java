@@ -5,6 +5,8 @@ import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.repository.ClientRepository;
 import com.example.api_springboot.security.JwtUtil;
 
+import java.util.Optional;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -46,14 +48,8 @@ public class ClientService {
         }
     }
 
-    public Client getClient(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if(authentication ==null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())){
-            throw new RuntimeException("Utilisateur non authentifié");
-        }
-            String email = authentication.getName();
-            return clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
+    public Optional<Client> findClientById(Long clientId) {
+        return clientRepository.findById(clientId);
     }
 
     public Client deleteClient(){

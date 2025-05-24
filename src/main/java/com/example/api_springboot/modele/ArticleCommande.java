@@ -15,10 +15,10 @@ public class ArticleCommande {
     private int prix;
 
     @ManyToOne
-    @JoinColumn(name = "Plat", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "plat_id", referencedColumnName = "id", nullable = false)
     private Plat plat;
 
     @ManyToOne
-    @JoinColumn(name = "Commande", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "commande_id", referencedColumnName = "id", nullable = false)
     private Commande commande;
 }

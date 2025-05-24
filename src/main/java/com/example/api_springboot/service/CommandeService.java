@@ -2,6 +2,7 @@ package com.example.api_springboot.service;
 
 import java.util.List;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.api_springboot.dto.CommandeRequest;
@@ -16,7 +17,11 @@ import com.example.api_springboot.repository.ClientRepository;
 import com.example.api_springboot.repository.CommandeRepository;
 import com.example.api_springboot.repository.PlatRepository;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,32 +35,57 @@ public class CommandeService {
 
     @Transactional
     public Commande creerCommande(CommandeRequest request) {
-        Client client = clientRepository.findById(request.getClientId())
-            .orElseThrow(() -> new RuntimeException("Client introuvable"));
-
-        // Create the order
-        Commande commande = new Commande();
-        commande.setClient(client);
-        commande.setPrixTotal(request.getPrixTotal());
-        commande.setStatut(StatutCommande.En_attente);
-        
-        commande = commandeRepository.save(commande);
-
-        // Add order items
-        for (CommandeRequest.ArticleRequest articleReq : request.getArticles()) {
-            Plat plat = platRepository.findById(articleReq.getPlatId())
-                .orElseThrow(() -> new RuntimeException("Plat non trouvé: " + articleReq.getPlatId()));
-
-            ArticleCommande article = new ArticleCommande();
-            article.setPlat(plat);
-            article.setQuantite(articleReq.getQuantite());
-            article.setPrix(articleReq.getPrix());
-            article.setCommande(commande);
-            
-            articleCommandeRepository.save(article);
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null");
         }
+        if (request.getArticles() == null || request.getArticles().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one article is required");
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        return commande;
+        if(authentication!=null && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            Client client = clientRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Email non trouvé"));
+
+            System.out.println("Client email from token: " + authentication.getName());
+            // Create the order
+            Commande commande = new Commande();
+            commande.setClient(client);
+            commande.setPrixTotal(request.getPrixTotal());
+            commande.setStatut(StatutCommande.En_attente);
+
+            if (request.getRating() != 0) {
+                commande.setRating(request.getRating());
+            }
+            if (request.getCommentaire() != null) {
+                commande.setCommentaire(request.getCommentaire());
+            }
+            // Save the commande first (optional if using CascadeType.ALL)
+            commande = commandeRepository.save(commande);
+
+            // Add order items
+            for (CommandeRequest.ArticleRequest articleReq : request.getArticles()) {
+                if (articleReq.getPlatId() == null) {
+                    throw new IllegalArgumentException("Plat ID is required");
+                }
+
+                Plat plat = platRepository.findById(articleReq.getPlatId())
+                    .orElseThrow(() -> new RuntimeException("Plat non trouvé: " + articleReq.getPlatId()));
+
+                ArticleCommande article = new ArticleCommande();
+                article.setPlat(plat);
+                article.setQuantite(articleReq.getQuantite());
+                article.setPrix(articleReq.getPrix());
+                article.setCommande(commande);
+
+                // Either save manually or let JPA cascade handle it
+                articleCommandeRepository.save(article); // Option 1 (manual)
+                // commande.getArticleCommandes().add(article); // Option 2 (auto-cascade)
+            }
+
+            return commandeRepository.save(commande); // Re-save to update any changes
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
     }
 
     // Custom exception
@@ -89,7 +119,6 @@ public class CommandeService {
 
     private CommandeRequest mapToCommandeDetailDTO(Commande commande) {
         return new CommandeRequest(
-            commande.getClient(),
             commande.getPrixTotal(),
             commande.getStatut(),
             commande.getRating(),
