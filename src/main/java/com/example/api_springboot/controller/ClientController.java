@@ -16,7 +16,7 @@ import com.example.api_springboot.service.ClientService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/client")
+@RequestMapping("/api/client")
 @RequiredArgsConstructor
 public class ClientController {
 

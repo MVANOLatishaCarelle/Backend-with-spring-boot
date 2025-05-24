@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/plat")
+@RequestMapping("/api/plat")
 @RequiredArgsConstructor
 public class PlatController {
 
@@ -47,7 +47,7 @@ public class PlatController {
     }
 
     @GetMapping("/disponibles")
-    public ResponseEntity<List<Plat>> getPlatByDisponibilite(@RequestParam boolean disponible) {
+    public ResponseEntity<List<Plat>> getPlatByDisponibilite(@RequestParam(defaultValue = "true") boolean disponible) {
         List<Plat> plats = platService.getPlatByDisponibilite(disponible);
         return ResponseEntity.ok(plats);
     }

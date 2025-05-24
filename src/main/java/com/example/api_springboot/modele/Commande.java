@@ -1,5 +1,8 @@
 package com.example.api_springboot.modele;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -27,5 +30,9 @@ public class Commande {
     @ManyToOne
     @JoinColumn(name ="Client", referencedColumnName = "id", nullable = false)
     private Client client;
+
+    // Add this inverse relationship
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ArticleCommande> articleCommandes = new ArrayList<>();
 
 }

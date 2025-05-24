@@ -11,7 +11,10 @@ import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.modele.Vendeur;
 import com.example.api_springboot.repository.ClientRepository;
 import com.example.api_springboot.repository.VendeurRepository;
+import org.springframework.stereotype.Service;
 
+
+@Service
 public class CustomUserDetailsService implements UserDetailsService{
     private final VendeurRepository vendeurRepository;
     private final ClientRepository clientRepository;
@@ -20,6 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService{
         this.vendeurRepository = vendeurRepository;
         this.clientRepository = clientRepository;
     }
+    
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
         Vendeur vendeur = vendeurRepository.findByEmail(email).orElse(null);;

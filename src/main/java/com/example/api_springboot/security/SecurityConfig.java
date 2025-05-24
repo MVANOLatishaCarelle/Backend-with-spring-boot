@@ -43,15 +43,17 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Endpoints publics
                 .requestMatchers(HttpMethod.POST, "/client", "/vendeur").permitAll()
-                .requestMatchers(HttpMethod.GET, "/plat/{nom}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/plat/{nom}", "/api/plat/disponibles").permitAll()
                 .requestMatchers(HttpMethod.POST, "/client/auth", "/vendeur/auth").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/client/auth", "/api/client").permitAll()
                 // Endpoints nécessitant une authentification
                 .requestMatchers(HttpMethod.GET, "/client", "/vendeur").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/client","/vendeur").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/client", "/vendeur").authenticated()
-                .requestMatchers(HttpMethod.POST, "/plat").authenticated()
-                .requestMatchers(HttpMethod.GET, "/plat/mes-plats", "/plat/mes-plats/recherche").authenticated()
-                
+                .requestMatchers(HttpMethod.POST, "/api/plat").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/plat/mes-plats", "/api/plat/mes-plats/recherche").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/commande").authenticated()
+
                 .anyRequest().permitAll()
             )
             // Ajout du filtre JWT avant le filtre d'authentification standard
@@ -63,7 +65,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://192.168.137.1")); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));

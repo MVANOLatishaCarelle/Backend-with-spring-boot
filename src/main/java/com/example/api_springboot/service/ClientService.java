@@ -10,10 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class ClientService {
 
     private final ClientRepository clientRepository;
@@ -90,7 +87,7 @@ public class ClientService {
             if(cl.getEmail()!=null){
                 existingClient.setEmail(cl.getEmail());
             }
-            if(cl.getPhone()!=0){
+            if(cl.getPhone()!=null){
                 existingClient.setPhone(cl.getPhone());
             }
             if(cl.getPassword()!=null){

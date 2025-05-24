@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/vendeur")
+@RequestMapping("/api/vendeur")
 @RequiredArgsConstructor
 public class VendeurController {
     private final VendeurService vendeurService;
