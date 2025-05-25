@@ -12,10 +12,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommandeRequest {
+    private Long id;
     private int prixTotal;
     private StatutCommande statut;
     private int rating;
     private String commentaire;
+    private Long clientId;
+    private String phone;
     private List<ArticleRequest> articles = new ArrayList<>();
 
     @Data
@@ -23,6 +26,7 @@ public class CommandeRequest {
     @AllArgsConstructor
     public static class ArticleRequest {
         private Long platId;
+        private String nom;
         private int quantite;
         private int prix;
     }

@@ -66,9 +66,19 @@ public class CommandeController {
     // }
 
     @GetMapping
-    public ResponseEntity<?> getAllVendorOrders() {
+    public ResponseEntity<?> getAllVendeurCommandes() {
         try {
             List<CommandeRequest> vendorOrders = commandeService.getAllVendeurCommandes();
+            return ResponseEntity.ok(vendorOrders);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @GetMapping("/livre")
+    public ResponseEntity<?> getAllVendeurCommandesSaufLivre() {
+        try {
+            List<CommandeRequest> vendorOrders = commandeService.getAllVendeurCommandesSaufLivre();
             return ResponseEntity.ok(vendorOrders);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

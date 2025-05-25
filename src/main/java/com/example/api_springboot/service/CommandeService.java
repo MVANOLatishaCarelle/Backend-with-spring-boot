@@ -157,10 +157,13 @@ public class CommandeService {
 
     private CommandeRequest mapToCommandeDetailDTO(Commande commande) {
         return new CommandeRequest(
+            commande.getId(),
             commande.getPrixTotal(),
             commande.getStatut(),
             commande.getRating() != null ? commande.getRating() : 0,
             commande.getCommentaire(),
+            commande.getClient().getId(),
+            commande.getClient().getPhone(),
             mapToArticleRequests(commande.getArticleCommandes())
         );
     }
@@ -169,6 +172,7 @@ public class CommandeService {
         return articles.stream()
                 .map(article -> new CommandeRequest.ArticleRequest(
                         article.getPlat().getId(),
+                        article.getPlat().getNom(),
                         article.getQuantite(),
                         article.getPrix()
                 ))
@@ -195,6 +199,37 @@ public class CommandeService {
         List<Commande> vendorCommandes = allCommandes.stream()
                 .filter(commande -> commande.getArticleCommandes().stream()
                         .anyMatch(article -> article.getPlat().getVendeur().getId().equals(vendeur.getId())))
+                .collect(Collectors.toList());
+        
+        // Map to DTOs
+        return vendorCommandes.stream()
+                .map(this::mapToCommandeDetailDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommandeRequest> getAllVendeurCommandesSaufLivre() {
+        // Get authenticated vendor from security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new RuntimeException("Vendor not authenticated");
+        }
+        
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+        
+        // Get all orders that contain at least one dish from this vendor and exclude "LIVRE" status
+        List<Commande> vendorCommandes = commandeRepository.findAll().stream()
+                .filter(commande -> 
+                    // Check if order contains vendor's dishes
+                    commande.getArticleCommandes().stream()
+                        .anyMatch(article -> article.getPlat().getVendeur().getId().equals(vendeur.getId()))
+                    &&
+                    // Exclude "LIVRE" status orders
+                    !commande.getStatut().equals(StatutCommande.Livre) // or "LIVRE" if using String
+                )
                 .collect(Collectors.toList());
         
         // Map to DTOs
