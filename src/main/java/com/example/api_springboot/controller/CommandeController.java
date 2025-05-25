@@ -1,7 +1,7 @@
 package com.example.api_springboot.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,15 +33,54 @@ public class CommandeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommandeRequest> commandeDetail(@PathVariable Long id) {
-        CommandeRequest detail = commandeService.commandeDetail(id);
-        return ResponseEntity.ok(detail);
-    } 
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<CommandeStatus> updateOrderToShipping(@PathVariable Long id) {
-        CommandeStatus updatedOrder = commandeService.updateCommandeStatus(id, StatutCommande.En_livraison);
-        return ResponseEntity.ok(updatedOrder);
+    public ResponseEntity<?> commandeDetail(@PathVariable Long id) {
+        try {
+            CommandeRequest detail = commandeService.commandeDetail(id);
+            return ResponseEntity.ok(detail);
+        } catch (RuntimeException e) {
+            return handleCommandeException(e);
+        }
     }
+
+    @PatchMapping("/{id}/en-livraison")
+    public ResponseEntity<?> updateOrderToShipping(@PathVariable Long id) {
+        try {
+            CommandeStatus updatedOrder = commandeService.updateCommandeStatus(id, StatutCommande.En_livraison);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (RuntimeException e) {
+            return handleCommandeException(e);
+        }
+    }
+
+    // @PatchMapping("/{id}/complete")
+    // public ResponseEntity<?> updateOrderToCompleted(@PathVariable Long id) {
+    //     try {
+    //         CommandeStatus updatedOrder = commandeService.updateCommandeStatus(id, StatutCommande.Terminé);
+    //         return ResponseEntity.ok(updatedOrder);
+    //     } catch (RuntimeException e) {
+    //         return handleCommandeException(e);
+    //     }
+    // }
+
+    private ResponseEntity<?> handleCommandeException(RuntimeException e) {
+        String errorMessage = e.getMessage();
+        
+        if (errorMessage.contains("not authenticated") || errorMessage.contains("non authentifié")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Authentification requise", errorMessage));
+        } else if (errorMessage.contains("not found") || errorMessage.contains("non trouvé")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Ressource introuvable", errorMessage));
+        } else if (errorMessage.contains("Unauthorized access")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponse("Accès refusé", errorMessage));
+        }
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("Erreur serveur", errorMessage));
+    }
+
+    // Simple error response DTO
+    public record ErrorResponse(String error, String message) {}
     
 }

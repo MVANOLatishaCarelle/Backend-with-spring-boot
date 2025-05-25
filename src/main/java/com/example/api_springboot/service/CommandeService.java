@@ -12,10 +12,12 @@ import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.modele.Commande;
 import com.example.api_springboot.modele.Plat;
 import com.example.api_springboot.modele.StatutCommande;
+import com.example.api_springboot.modele.Vendeur;
 import com.example.api_springboot.repository.ArticleCommandeRepository;
 import com.example.api_springboot.repository.ClientRepository;
 import com.example.api_springboot.repository.CommandeRepository;
 import com.example.api_springboot.repository.PlatRepository;
+import com.example.api_springboot.repository.VendeurRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -32,6 +34,7 @@ public class CommandeService {
     private final CommandeRepository commandeRepository;
     private final PlatRepository platRepository;
     private final ArticleCommandeRepository articleCommandeRepository;
+    private final VendeurRepository vendeurRepository;
 
     @Transactional
     public Commande creerCommande(CommandeRequest request) {
@@ -88,29 +91,63 @@ public class CommandeService {
         throw new RuntimeException("Utilisateur non authentifié");
     }
 
-    // Custom exception
-    public class OrderLimitException extends RuntimeException {
-        public OrderLimitException(String message) {
-            super(message);
-        }
-    }
 
     @Transactional(readOnly = true)
     public CommandeRequest commandeDetail(Long id) {
+        // Get authenticated vendor from security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new RuntimeException("Vendor not authenticated");
+        }
+        
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+        
+        // Find the order
         Commande commande = commandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Commande non trouvé avec cet Id: " + id));
-
+        
+        // Check if any dish in the order belongs to this vendor
+        boolean isOrderRelatedToVendor = commande.getArticleCommandes().stream()
+                .anyMatch(article -> article.getPlat().getVendeur().getId().equals(vendeur.getId()));
+        
+        if (!isOrderRelatedToVendor) {
+            throw new RuntimeException("Unauthorized access - this order doesn't belong to your vendor account");
+        }
+        
         return mapToCommandeDetailDTO(commande);
     }
 
     @Transactional
     public CommandeStatus updateCommandeStatus(Long id, StatutCommande newStatus) {
+        // Get authenticated vendor from security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new RuntimeException("Vendor not authenticated");
+        }
+        
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+        
+        // Find the order
         Commande commande = commandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Commande non trouvé avec cet Id: " + id));
-
+        
+        // Check if any dish in the order belongs to this vendor
+        boolean isOrderRelatedToVendor = commande.getArticleCommandes().stream()
+                .anyMatch(article -> article.getPlat().getVendeur().getId().equals(vendeur.getId()));
+        
+        if (!isOrderRelatedToVendor) {
+            throw new RuntimeException("Unauthorized access - this order doesn't belong to your vendor account");
+        }
+        
         commande.setStatut(newStatus);
         Commande updatedCommande = commandeRepository.save(commande);
-
+        
         return new CommandeStatus(
                 updatedCommande.getId(),
                 updatedCommande.getStatut()
@@ -121,19 +158,19 @@ public class CommandeService {
         return new CommandeRequest(
             commande.getPrixTotal(),
             commande.getStatut(),
-            commande.getRating(),
+            commande.getRating() != null ? commande.getRating() : 0,
             commande.getCommentaire(),
             mapToArticleRequests(commande.getArticleCommandes())
         );
     }
 
     private List<CommandeRequest.ArticleRequest> mapToArticleRequests(List<ArticleCommande> articles) {
-    return articles.stream()
-            .map(article -> new CommandeRequest.ArticleRequest(
-                    article.getPlat().getId(),
-                    article.getQuantite(),
-                    article.getPrix()
-            ))
-            .toList();
-}
+        return articles.stream()
+                .map(article -> new CommandeRequest.ArticleRequest(
+                        article.getPlat().getId(),
+                        article.getQuantite(),
+                        article.getPrix()
+                ))
+                .toList();
+    }
 }
