@@ -1,6 +1,7 @@
 package com.example.api_springboot.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -173,4 +174,33 @@ public class CommandeService {
                 ))
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<CommandeRequest> getAllVendeurCommandes() {
+        // Get authenticated vendor from security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new RuntimeException("Vendor not authenticated");
+        }
+        
+        String email = authentication.getName();
+        Vendeur vendeur = vendeurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+        
+        // Get all orders that contain at least one dish from this vendor
+        List<Commande> allCommandes = commandeRepository.findAll();
+        
+        // Filter orders to only include those with dishes from this vendor
+        List<Commande> vendorCommandes = allCommandes.stream()
+                .filter(commande -> commande.getArticleCommandes().stream()
+                        .anyMatch(article -> article.getPlat().getVendeur().getId().equals(vendeur.getId())))
+                .collect(Collectors.toList());
+        
+        // Map to DTOs
+        return vendorCommandes.stream()
+                .map(this::mapToCommandeDetailDTO)
+                .collect(Collectors.toList());
+    }
+  
 }

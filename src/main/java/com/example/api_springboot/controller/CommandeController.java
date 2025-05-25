@@ -1,5 +1,7 @@
 package com.example.api_springboot.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class CommandeController {
 
     private final CommandeService commandeService;
+
     
     @PostMapping
     public ResponseEntity<?> passerCommande(@RequestBody CommandeRequest request) {
@@ -61,6 +64,16 @@ public class CommandeController {
     //         return handleCommandeException(e);
     //     }
     // }
+
+    @GetMapping
+    public ResponseEntity<?> getAllVendorOrders() {
+        try {
+            List<CommandeRequest> vendorOrders = commandeService.getAllVendeurCommandes();
+            return ResponseEntity.ok(vendorOrders);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
 
     private ResponseEntity<?> handleCommandeException(RuntimeException e) {
         String errorMessage = e.getMessage();
