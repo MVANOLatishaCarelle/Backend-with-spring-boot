@@ -37,4 +37,7 @@ public class Commande {
     @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ArticleCommande> articleCommandes = new ArrayList<>();
 
+    @Column(name = "qr_code_data", length = 500)
+    private String qrCodeData;
+
 }

@@ -1,5 +1,7 @@
 package com.example.api_springboot.service;
 
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.digest.DigestUtils;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
@@ -147,12 +154,52 @@ public class CommandeService {
         }
         
         commande.setStatut(newStatus);
+        if (shouldGenerateQrCode(commande.getStatut(), newStatus)) {
+            String qrCodeData = generateQrCodeData(commande);
+            commande.setQrCodeData(qrCodeData);
+        }
         Commande updatedCommande = commandeRepository.save(commande);
         
         return new CommandeStatus(
                 updatedCommande.getId(),
-                updatedCommande.getStatut()
+                updatedCommande.getStatut(),
+                updatedCommande.getQrCodeData()
         );
+    }
+
+    private boolean shouldGenerateQrCode(StatutCommande oldStatus, StatutCommande newStatus) {
+        // Generate QR code only when order moves to specific statuses
+        return newStatus == StatutCommande.En_livraison;
+    }
+
+    private String generateQrCodeData(Commande commande) {
+        // Create a unique payload containing order info
+        Map<String, Object> qrPayload = new HashMap<>();
+        qrPayload.put("orderId", commande.getId());
+        qrPayload.put("clientId", commande.getClient().getId());
+        qrPayload.put("status", commande.getStatut().name());
+        qrPayload.put("timestamp", Instant.now().toString());
+        qrPayload.put("total", commande.getPrixTotal());
+        
+        // Add security hash
+        String securityHash = generateSecurityHash(commande);
+        qrPayload.put("hash", securityHash);
+        
+        try {
+            return new ObjectMapper().writeValueAsString(qrPayload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to generate QR code data", e);
+        }
+    }
+
+    private String generateSecurityHash(Commande commande) {
+        // Create a simple hash for basic verification
+        String raw = commande.getId() + "|" + 
+                    commande.getClient().getId() + "|" + 
+                    commande.getStatut().name() + "|" +
+                    "your-secret-salt"; // Use a proper secret from configuration
+        
+        return DigestUtils.sha256Hex(raw);
     }
 
     private CommandeRequest mapToCommandeDetailDTO(Commande commande) {
@@ -164,6 +211,7 @@ public class CommandeService {
             commande.getCommentaire(),
             commande.getClient().getId(),
             commande.getClient().getPhone(),
+            commande.getClient().getEmail(),
             mapToArticleRequests(commande.getArticleCommandes())
         );
     }
@@ -172,6 +220,7 @@ public class CommandeService {
         return articles.stream()
                 .map(article -> new CommandeRequest.ArticleRequest(
                         article.getPlat().getId(),
+                        article.getPlat().getPhoto(),
                         article.getPlat().getNom(),
                         article.getQuantite(),
                         article.getPrix()

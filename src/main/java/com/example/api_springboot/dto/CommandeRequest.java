@@ -19,6 +19,7 @@ public class CommandeRequest {
     private String commentaire;
     private Long clientId;
     private String phone;
+    private String email;
     private List<ArticleRequest> articles = new ArrayList<>();
 
     @Data
@@ -26,6 +27,7 @@ public class CommandeRequest {
     @AllArgsConstructor
     public static class ArticleRequest {
         private Long platId;
+        private String photo;
         private String nom;
         private int quantite;
         private int prix;
