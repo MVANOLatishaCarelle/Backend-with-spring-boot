@@ -209,6 +209,7 @@ public class CommandeService {
             commande.getStatut(),
             commande.getRating() != null ? commande.getRating() : 0,
             commande.getCommentaire(),
+            commande.getQrCodeData(),
             commande.getClient().getId(),
             commande.getClient().getPhone(),
             commande.getClient().getEmail(),
@@ -283,6 +284,28 @@ public class CommandeService {
         
         // Map to DTOs
         return vendorCommandes.stream()
+                .map(this::mapToCommandeDetailDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommandeRequest> getAllClientCommandes() {
+        // Get authenticated client from security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new RuntimeException("Client not authenticated");
+        }
+        
+        String email = authentication.getName();
+        Client client = clientRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+        
+        // Get all orders made by this client
+        List<Commande> clientCommandes = commandeRepository.findByClient(client);
+        
+        // Map to DTOs
+        return clientCommandes.stream()
                 .map(this::mapToCommandeDetailDTO)
                 .collect(Collectors.toList());
     }

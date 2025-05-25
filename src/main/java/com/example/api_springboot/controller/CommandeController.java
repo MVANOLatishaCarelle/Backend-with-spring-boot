@@ -48,8 +48,8 @@ public class CommandeController {
     @PatchMapping("/{id}/en-livraison")
     public ResponseEntity<?> updateOrderToShipping(@PathVariable Long id) {
         try {
-            CommandeStatus updatedOrder = commandeService.updateCommandeStatus(id, StatutCommande.En_livraison);
-            return ResponseEntity.ok(updatedOrder);
+            CommandeStatus updatedCommande = commandeService.updateCommandeStatus(id, StatutCommande.En_livraison);
+            return ResponseEntity.ok(updatedCommande);
         } catch (RuntimeException e) {
             return handleCommandeException(e);
         }
@@ -65,11 +65,21 @@ public class CommandeController {
     //     }
     // }
 
-    @GetMapping
+    @GetMapping("/vendeur")
     public ResponseEntity<?> getAllVendeurCommandes() {
         try {
-            List<CommandeRequest> vendorOrders = commandeService.getAllVendeurCommandes();
-            return ResponseEntity.ok(vendorOrders);
+            List<CommandeRequest> vendeurCommandes = commandeService.getAllVendeurCommandes();
+            return ResponseEntity.ok(vendeurCommandes);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @GetMapping("/client")
+    public ResponseEntity<?> getAllClientCommandes() {
+        try {
+            List<CommandeRequest> clientCommandes = commandeService.getAllClientCommandes();
+            return ResponseEntity.ok(clientCommandes);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -78,8 +88,8 @@ public class CommandeController {
     @GetMapping("/livre")
     public ResponseEntity<?> getAllVendeurCommandesSaufLivre() {
         try {
-            List<CommandeRequest> vendorOrders = commandeService.getAllVendeurCommandesSaufLivre();
-            return ResponseEntity.ok(vendorOrders);
+            List<CommandeRequest> vendeurCommandes = commandeService.getAllVendeurCommandesSaufLivre();
+            return ResponseEntity.ok(vendeurCommandes);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

@@ -2,8 +2,6 @@ package com.example.api_springboot.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.example.api_springboot.modele.Client;
 import com.example.api_springboot.modele.StatutCommande;
 
 import lombok.*;
@@ -17,6 +15,7 @@ public class CommandeRequest {
     private StatutCommande statut;
     private int rating;
     private String commentaire;
+    private String qrcode;
     private Long clientId;
     private String phone;
     private String email;

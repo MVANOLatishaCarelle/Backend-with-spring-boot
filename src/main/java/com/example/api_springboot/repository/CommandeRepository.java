@@ -14,4 +14,6 @@ public interface CommandeRepository extends JpaRepository<Commande, Long>{
     long countByClient(Client client);
     @Query("SELECT DISTINCT c FROM Commande c JOIN c.articleCommandes ac JOIN ac.plat p WHERE p.vendeur.id = :vendeurId")
     List<Commande> findByVendeurId(@Param("vendeurId") Long vendeurId);
+    List<Commande> findByClient(Client client);
+
 }
